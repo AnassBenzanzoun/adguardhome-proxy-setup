@@ -1,0 +1,32 @@
+version: "3.2"
+
+networks:
+  custom_network:
+    driver: bridge
+
+services: 
+  adguard:
+    container_name: adguard
+    image: adguard/adguardhome
+    networks:
+      - custom_network
+    volumes: 
+      - ./data:/opt/adguardhome/work
+      - ./conf:/opt/adguardhome/conf
+    restart: unless-stopped
+
+  nginx-proxy:
+    image: nginx:latest
+    container_name: nginx-proxy
+    networks:
+      - custom_network
+    ports:
+      - 53:53/udp
+      - 53:53
+      - 8080:80
+      - 443:443
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    restart: unless-stopped
+    depends_on:
+      - adguard
